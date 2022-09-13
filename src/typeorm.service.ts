@@ -11,6 +11,7 @@ export class TypeOrmConfigService implements TypeOrmOptionsFactory {
       database: process.env.DATABASE_NAME,
       username: process.env.DATABASE_USER,
       password: process.env.DATABASE_PASSWORD,
+      bigNumberStrings: false,
       entities: ['dist/**/*.entity.{ts,js}'],
       migrations: ['dist/migrations/*.{ts,js}'],
       migrationsTableName: 'typeorm_migrations',
