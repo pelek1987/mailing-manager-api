@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { UserEntity } from './user.entity';
 import { RegisterUserResponse, User } from 'src/types/user';
-import * as bcrypt from 'bcrypt';
+import { hashPassword } from 'src/utils/hash-password';
 
 @Injectable()
 export class UserService {
@@ -26,8 +26,7 @@ export class UserService {
       throw new BadRequestException();
     }
 
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
+    const hashedPassword = hashPassword(password);
 
     newUser.firstname = firstname;
     newUser.lastname = lastname;

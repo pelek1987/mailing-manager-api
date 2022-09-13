@@ -17,5 +17,5 @@ export class UserEntity extends BaseEntity {
   pwdHash: string;
 
   @Column({ default: null, nullable: true })
-  currentTokenId: number | null;
+  currentTokenId: string | null;
 }
