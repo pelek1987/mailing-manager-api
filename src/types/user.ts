@@ -5,7 +5,9 @@ export interface User {
   password: string;
 }
 
-export interface RegisterUserResponse {
-  id: string;
-  username: string;
-}
+// export interface RegisterUserResponse {
+//   id: string;
+//   username: string;
+// }
+
+export type RegisterUserResponse = boolean;

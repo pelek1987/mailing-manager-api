@@ -5,7 +5,7 @@ import { hashPassword } from 'src/utils/hash-password';
 
 @Injectable()
 export class UserService {
-  private async findOne(username: string) {
+  async findOne(username: string) {
     return await UserEntity.findOne({
       where: {
         username,
@@ -35,9 +35,6 @@ export class UserService {
 
     await newUser.save();
 
-    return {
-      id: newUser.id,
-      username: newUser.username,
-    };
+    return true;
   }
 }

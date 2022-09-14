@@ -1,29 +1,27 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { Response } from 'express';
 import { UserEntity } from 'src/user/user.entity';
-import { hashPassword } from 'src/utils/hash-password';
+// import { hashPassword } from 'src/utils/hash-password';
 import { LoginUsertDTO } from './dto/login-user.dto';
+import { UserService } from 'src/user/user.service';
 import { JwtPayload } from './jwt.strategy';
-import * as dotenv from 'dotenv';
-import { sign } from 'jsonwebtoken';
+import { JwtService } from '@nestjs/jwt';
 import { v4 as uuid } from 'uuid';
-dotenv.config();
 
 @Injectable()
 export class AuthService {
+  constructor(
+    @Inject(UserService) private userService: UserService,
+    @Inject(JwtService) private jwtService: JwtService,
+  ) {}
   private createToken(currentTokenId: string): {
     accessToken: string;
-    expiresIn: number;
   } {
     const payload: JwtPayload = { id: currentTokenId };
-    const expiresIn = 60 * 60 * 24;
-    const accessToken = sign(payload, process.env.JWT_SECRET, {
-      expiresIn,
-    });
+    const accessToken = this.jwtService.sign(payload);
 
     return {
       accessToken,
-      expiresIn,
     };
   }
 
@@ -46,12 +44,7 @@ export class AuthService {
 
   async login(req: LoginUsertDTO, res: Response): Promise<any> {
     try {
-      const user = await UserEntity.findOne({
-        where: {
-          username: req.username,
-          pwdHash: hashPassword(req.password),
-        },
-      });
+      const user = await this.userService.findOne(req.username);
       if (!user) {
         return res.json({
           error: 'Invalid login data',
@@ -66,6 +59,23 @@ export class AuthService {
           httpOnly: true,
         })
         .json({ ok: true });
+    } catch (err) {
+      return res.json({
+        error: err.message,
+      });
+    }
+  }
+
+  async logout(user: UserEntity, res: Response) {
+    try {
+      user.currentTokenId = null;
+      await user.save();
+      res.clearCookie('access_token', {
+        secure: false,
+        domain: 'localhost',
+        httpOnly: true,
+      });
+      return res.json({ ok: true });
     } catch (err) {
       return res.json({
         error: err.message,
